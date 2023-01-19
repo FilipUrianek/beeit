@@ -18,7 +18,7 @@ Projekty jsou zaměřené vždy na určitou pozici, která vás zajímá (pozná
     </thead>
     <tbody>
         <tr>
-            <td>1</td><td>Analýza bankovního účtu</td><td>Datová analýza (DA)</td>
+            <td>1</td><td><a href="./DA_bankovni_ucet">Analýza bankovního účtu</a></td><td>Datová analýza (DA)</td>
         </tr>
         <tr>
             <td>2</td><td>Datový dashboard pro počasí</td><td>Datová analýza (DA)</td>
