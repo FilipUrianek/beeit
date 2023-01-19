@@ -59,16 +59,16 @@ Cvičení v Jupyter notebookách mají následující témata:
     </thead>
     <tbody>
         <tr>
-            <td>1</td><td>Získávání dat z datových rámců</td><td>[Týden 1](./cviceni/tyden1/cviceni1.ipynb)</td>
+            <td>1</td><td>Získávání dat z datových rámců</td><td>![Týden 1](./cviceni/tyden1/cviceni1.ipynb)</td>
         </tr>
         <tr>
-            <td>2</td><td>Výpočet statistik nad datovým rámcem</td><td>[Týden 2](./cviceni/tyden2/cviceni2.ipynb)</td>
+            <td>2</td><td>Výpočet statistik nad datovým rámcem</td><td>![Týden 2](./cviceni/tyden2/cviceni2.ipynb)</td>
         </tr>
         <tr>
-            <td>3</td><td>Konstrukce datových rámců</td><td>[Týden 3](./cviceni/tyden3/cviceni3.ipynb)</td>
+            <td>3</td><td>Konstrukce datových rámců</td><td>![Týden 3](./cviceni/tyden3/cviceni3.ipynb)</td>
         </tr>
         <tr>
-            <td>4</td><td>Práce s cestou a argumenty příkazové řádky</td><td>[Týden 4](./cviceni/tyden4/cviceni4.ipynb)</td>
+            <td>4</td><td>Práce s cestou a argumenty příkazové řádky</td><td>![Týden 4](./cviceni/tyden4/cviceni4.ipynb)</td>
         </tr>
     </tbody>
 </table>
