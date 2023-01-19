@@ -59,7 +59,7 @@ Cvičení v Jupyter notebookách mají následující témata:
     </thead>
     <tbody>
         <tr>
-            <td>1</td><td>Získávání dat z datových rámců</td><td>![Týden 1](./cviceni/tyden1/cviceni1.ipynb)</td>
+            <td>1</td><td>Získávání dat z datových rámců</td><td><a href="./cviceni/tyden1/cviceni1.ipynb">Týden 1</a></td>
         </tr>
         <tr>
             <td>2</td><td>Výpočet statistik nad datovým rámcem</td><td>![Týden 2](./cviceni/tyden2/cviceni2.ipynb)</td>
