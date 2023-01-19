@@ -72,3 +72,5 @@ Cvičení v Jupyter notebookách mají následující témata:
         </tr>
     </tbody>
 </table>
+
+Doporučuji si stáhnotu celou složku se cvičeními, kde máte i potřebné datové zdroje: [ZDE](./cviceni)
