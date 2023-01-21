@@ -1,31 +1,59 @@
-import requests
+#import standardních modulů
 import copy
 import json
 import time
-from dash import Dash, Input, Output, dcc, html, State
+
+#import modulů, které se musí doinstalovat
+import requests
 import dash
-import plotly.graph_objects as go
+from dash import Dash, Input, Output, dcc, html, State
 import dash_bootstrap_components as dbc
 import dash_leaflet as dl
+import plotly.graph_objects as go
 from decouple import config
 
+#načtení konfigurační údajů z config souboru
 USERNAME = config('USER')
 KEY = config('USER_KEY')
 
+#URL pro API využívaných služeb
 WEATHER_API_URL = "https://api.openweathermap.org/data/2.5/weather?"
 FORECAST_API_URL = "http://api.openweathermap.org/data/2.5/forecast"
 GEO_API_URL_DIRECT = "http://api.openweathermap.org/geo/1.0/direct"
 GEO_API_URL_REVERSE = "http://api.openweathermap.org/geo/1.0/reverse"
 
+#
 BASE_PARAMS = {"APPID": KEY}
 
 
 def get_json(_url, params):
+    """
+    Funkce požádá API službu na dané url o požadavek na základě zadaných parametrů a vrátí odpověď v JSON formátu.
+
+    Vstupy:
+        _url: str -> adresa odkazující na API webové služby
+        params: Dict[str, str] -> parametry potrebné pro webovou službu
+
+    Návratové hodnoty:
+        json -> odpověď služby ve formátu JSONu
+    """
     response = requests.get(_url, params)
     return json.loads(response.content)
 
 
 def get_location_data(url, params, init_coord):
+    """
+    Funkce přijme adresu API služby, parametry a již explicitně zadané souřadnice. Pokud jsou souřadnice zadané, tak je vrátí v jednotném formátu zpět z funkce. Pokud nejsou, tak požádá službu o jejich získání.
+
+    Vstupy:
+        url: str ->
+        params: Dict[str, str] ->
+        init_coord: ->
+
+    Návratové hodnoty:
+        name: str -> 
+        lat_lon: ... -> 
+    """
     loc_data = get_json(url, params)
     loc_data = loc_data[0]
     if init_coord:
@@ -35,27 +63,27 @@ def get_location_data(url, params, init_coord):
     name = loc_data["name"] + ", " + loc_data["country"]
     return [name, lat_lon]
 
-
+#
 def geocode_forward(query):
     params = BASE_PARAMS.copy()
     params["limit"] = 1
     params["q"] = str(query)
     return get_location_data(GEO_API_URL_DIRECT, params, False)
 
-
+#
 def geocode_reverse(coords):
     params = BASE_PARAMS.copy()
     params["limit"] = 1
     params["lat"], params["lon"] = coords[0], coords[1]
     return get_location_data(GEO_API_URL_REVERSE, params, True)
 
-
+#
 def get_weather(url, coords):
     params = BASE_PARAMS.copy()
     params["lat"], params["lon"] = coords[0], coords[1]
     return get_json(url, params)
 
-
+#
 def generate_weather_card(weather_data):
     temp_feels_like = f'{round(weather_data["main"]["feels_like"] - 273.15, 1)} °C'
     temp_actual = f'{round(weather_data["main"]["temp"] - 273.15, 1)} °C'
@@ -99,7 +127,7 @@ def generate_weather_card(weather_data):
 
     return dbc.CardGroup(cards)
 
-
+#
 def make_figs(figs):
     return [
         dbc.Row([
@@ -138,7 +166,7 @@ def make_figs(figs):
             justify="evenly")
     ]
 
-
+#
 def generate_figures(data):
     tmrw_figs = []
     week_figs = []
@@ -190,7 +218,7 @@ def generate_figures(data):
 
     return make_figs(tmrw_figs), make_figs(week_figs)
 
-
+#přidej do datového dashboardu navigační lištu
 navbar = dbc.Navbar(dbc.Container([
     html.A(dbc.Row([
         dbc.Col([html.I(className="bi bi-cloud-sun fs-1", id="my_icon")]),
@@ -228,13 +256,30 @@ navbar = dbc.Navbar(dbc.Container([
     id="navbar")
 
 
-def layout():
+def layout() -> dbc.Container:
+    """
+    Funkce vytvoří základní rozvržení datového dashboardu
+
+    Návratové hodnoty:
+        dbc.Container -> obsahuje vytvořený html-dash layout, který se vykreslí do webové stránky
+    """
     return dbc.Container([
+
+        #umístění stránky na vybraný koncový bod Flasku
         dcc.Location(id='url', pathname="/home", refresh=False),
+        
+        #
         dcc.Store(id="forecast_figs"),
+        
+        #vytvoření navigační lišty
         dbc.Row([dbc.Col([navbar], width=12)], justify="center"),
+        
+        #vytvoření informační části datového dashboardu
         html.Div(children=[
+
+            #vytvoření řádku v layoutu, kde bude navigační vyhledávací liště
             dbc.Row([
+                #vytvoření vyhledávací lišty
                 dbc.Col([
                     dbc.Input(
                         type="text",
@@ -246,8 +291,8 @@ def layout():
                             'border-radius': '20px'
                         },
                         class_name="m-4 mb-2")
-                ],
-                    width=5),
+                ], width=5),
+                #vytvoření sloupce, kde se objeví zadané město a informace o zataženosti/jasnosti/pršení atd.
                 dbc.Col([
                     html.Div([
                         html.P(children=[],
@@ -258,15 +303,12 @@ def layout():
                                className="mt-4 text-white fw-bold fs-3")
                     ],
                         className="d-flex justify-content-center")
-                ],
-                    width={
-                    "size": 7,
-                    "offset": 0
-                })
-            ],
-                class_name="g-0",
-                align="center"),
+                ], width={"size": 7, "offset": 0})
+            ], class_name="g-0", align="center"),
+            
+            #vytvoření řádku, kde bude interaktivní mapa a tabulka s informacemi o teplotě/větrnosti/atmosféře
             dbc.Row([
+                #sloupec s interkativní mapou
                 dbc.Col([
                     dl.Map([dl.TileLayer(),
                             dl.LayerGroup(id="layer")],
@@ -279,8 +321,8 @@ def layout():
                                "border-radius": "20px"
                     },
                         className="m-4")
-                ],
-                    width=5),
+                ], width=5),
+                #sloupec, kde je původně návodný text a po zadání místa se tam objeví tabulka s informacemi
                 dbc.Col([
                     html.Div(html.H1("Select a location to display data",
                                      style={
@@ -291,64 +333,66 @@ def layout():
                              className="m-4")
                 ],
                     width={"size": 7})
-            ],
-                align="center"),
+            ], align="center"),
+            
+            #řádek, kde se bude nacházet dělící čára <hr>
             dbc.Row([
                 dbc.Col([
                     html.Hr(style={
                         "border": "2px solid white",
                         "border-radius": "20px",
                         "opacity": "1"
-                    },
-                        className="ms-4 me-4")
-                ],
-                    width=12)
-            ],
-                justify="center"),
+                    }, className="ms-4 me-4")
+                    ], width=12)
+                ], justify="center"),
+
+            #část dashboardu, kde se objeví výběr délky předpovědy počasí
             html.Div([
+                #nadpisový řádek
                 dbc.Row([
                     dbc.Col([
-                        html.H1("Forecast",
-                                className="text-white",
-                                style={"text-align": "center"})
-                    ],
-                        width=12)
-                ]),
+                        html.H1(
+                            "Forecast",
+                            className="text-white",
+                            style={"text-align": "center"})
+                        ], width=12)
+                    ]),
+                #řádek s výběrem předpovědi na zítra nebo na následujících 5 dní
                 dbc.Row([
                     dbc.Col([
-                        dcc.Dropdown(id="forecast_freq",
-                                     value="Tomorrow",
-                                     options=["Tomorrow", "Next 5 days"],
-                                     clearable=False,
-                                     className="mt-2 mb-2")
-                    ],
-                        width=2)
-                ],
-                    justify="center")
-            ],
-                id="forecast_descr",
-                hidden=True),
-            html.Div(html.H2("Select a location to show forecast",
-                             style={
-                                 "text-align": "center",
-                                 "color": "white",
-                                 "margin": "15px 0px 20px 0px"
-                             }),
-                     id="figures")
-        ],
-            style={
-            "border-radius": "20px",
-            "padding": "5px"
-        },
+                        dcc.Dropdown(
+                            id="forecast_freq",
+                            value="Tomorrow",
+                            options=["Tomorrow", "Next 5 days"],
+                            clearable=False,
+                            className="mt-2 mb-2"
+                            )
+                        ], width=2)
+                    ], justify="center")
+                ], id="forecast_descr", hidden=True),
+
+            #část dashboardu, která se přepíše předpovědí po zadání města
+            html.Div(
+                html.H2(
+                    "Select a location to show forecast",
+                    style={
+                        "text-align": "center",
+                        "color": "white",
+                        "margin": "15px 0px 20px 0px"
+                        }),
+                    id="figures")
+        
+            ],style={
+                "border-radius": "20px",
+                "padding": "5px"},
             className="ms-4 me-4 min-vh-100 bg-primary")
-    ],
-        fluid=True,
-        id="main")
+        ], fluid=True, id="main")
 
 
 app = Dash("My Weather App",
            external_stylesheets=[
-               dbc.themes.BOOTSTRAP, dbc.icons.BOOTSTRAP,
+               dbc.themes.BOOTSTRAP, 
+               dbc.icons.BOOTSTRAP,
                dbc.icons.FONT_AWESOME
            ],
            suppress_callback_exceptions=True,
@@ -357,9 +401,12 @@ app = Dash("My Weather App",
                'content': 'width=device-width, initial-scale=1.0'
            }])
 
+#
 app.layout = layout
 
-
+#callback funkce ...
+#vstupem je ...
+#výstupem je ...
 @app.callback([
     Output("layer", "children"),
     Output("map", "center"),
@@ -382,13 +429,17 @@ def address_to_coordinate(click_lat_lng, search_location):
                   children=dl.Tooltip("({:.3f}, {:.3f})".format(*lat_lon)))
     ], lat_lon, zoom, name, name
 
-
+#callback funkce ...
+#vstupem je ...
+#výstupem je ...
 @app.callback([
     Output("weather_main", "children"),
     Output("wicon", "children"),
     Output("situation", "children")
-], [State("map", "center"),
-    Input("location_name", "children")],
+    ], 
+    [State("map", "center"),
+    Input("location_name", "children")
+    ],
     prevent_initial_call=True)
 def parse_weather_content(lat_lon, lname):
     weather_data = get_weather(WEATHER_API_URL, lat_lon)
@@ -401,15 +452,21 @@ def parse_weather_content(lat_lon, lname):
         weather_data["weather"][0]["description"].capitalize()
     ]
 
-
-@app.callback(Output("url", "search"), Input("location_name", "children"))
+#callback funkce ...
+#vstupem je ...
+#výstupem je ...
+@app.callback(
+    Output("url", "search"), 
+    Input("location_name", "children"))
 def update_url(locname):
     if locname == []:
         return ""
     else:
         return f"?loc={locname}"
 
-
+#callback funkce ...
+#vstupem je ...
+#výstupem je ...
 @app.callback(
     [Output("forecast_figs", "data"),
      Output("forecast_descr", "hidden")],
@@ -422,7 +479,9 @@ def generate_figs(lat_lon, loc):
     fig_data = {"tomorrow": figs[0], "5days": figs[1]}
     return fig_data, False
 
-
+#callback funkce pro vykreslení grafu
+#vstupem je 
+#výstupem je
 @app.callback(
     [Output("figures", "children")],
     [Input("forecast_figs", "data"),
@@ -434,7 +493,9 @@ def display_figs(data, val):
     elif val == "Next 5 days":
         return [data["5days"]]
 
-
+#callback funkce pro změnu grafického tématu dashboardu na světlé
+#vstupem je celé číslo, představující pravdivostní hodnotu, které z tlačítek v preferences bylo zmáčknuté
+#výstupem je sada atributů potřebných k nastavení prvků dashboardu na světlé nebo temné schéma
 @app.callback([
     Output("navbar", "color"),
     Output("navbar", "dark"),
@@ -447,6 +508,7 @@ def display_figs(data, val):
 ], [Input("lightmode", "n_clicks"),
     Input("darkmode", "n_clicks")])
 def light_theme(n_light, n_dark):
+    #pokud je hodnota n_light = 1 a n_dark = 0, tak nastav potřebné parametry pro světlé téma
     if n_light > n_dark:
         return "white", False, "light", {
             "color": "black"
@@ -455,6 +517,7 @@ def light_theme(n_light, n_dark):
         }, {
             "color": "black"
         }
+    #v opačném případě vrať hodnoty stylů a příznaků pro zapnutí temného tématu
     else:
         return "black", True, "dark", {
             "color": "white"
